@@ -9,7 +9,6 @@ import json
 import traceback  # 누락된 traceback 모듈 import 추가
 import markdown  # 마크다운 변환을 위한 라이브러리 (설치 필요: pip install markdown)
 
-
 # 기본 콘텐츠 제공 함수들 (원래 코드에서 누락됨)
 def get_default_tips_content():
     """기본 AT/DT 팁 콘텐츠 반환"""
@@ -274,6 +273,159 @@ def fetch_news(api_type, query, days=7, language="en", display=5, **kwargs):
         print(f"{api_type} 데이터 수집 오류: {str(e)}")
         return []  # 오류 발생시 빈 리스트 반환
 
+# def generate_ai_content(openai_api_key, content_type, custom_prompt=None, **kwargs):
+#     """통합된 OpenAI 콘텐츠 생성 함수"""
+    
+#     if not openai_api_key:
+#         # API 키가 없는 경우 기본 콘텐츠 반환
+#         default_contents = {
+#             'main_news': "<p>API 키가 제공되지 않아 콘텐츠를 생성할 수 없습니다.</p>",
+#             'aidt_tips': get_default_tips_content(),
+#             'success_story': get_default_success_story(),
+#             'ai_use_case': get_default_ai_use_case()
+#         }
+#         return default_contents.get(content_type, "<p>API 키가 제공되지 않아 콘텐츠를 생성할 수 없습니다.</p>")
+    
+#     # 프롬프트 템플릿 정의
+#     prompt_templates = {
+#         'main_news': """
+#         AIDT Weekly 뉴스레터의 '주요 소식' 섹션을 생성해주세요.
+#         오늘 날짜는 {date}입니다. 아래는 두 종류의 뉴스 기사입니다:
+        
+#         === OpenAI 관련 뉴스 ===
+#         {openai_news_info}
+        
+#         === 일반 뉴스 ===
+#         {news_info}
+        
+#         총 2개의 주요 소식을 다음 형식으로 작성해주세요:
+        
+#         1. 먼저 OpenAI 관련 뉴스에서 가장 중요하고 관련성 높은 1개의 소식을 선택하여 작성하세요.
+#         2. 그 다음 일반 뉴스에서 가장 중요하고 관련성 높은 1개의 소식을 선택하여 작성하세요.
+        
+#         각 소식은 다음 형식으로 작성해주세요:
+#         ## [주제]의 [핵심 강점/특징]은 [주목할만합니다/확인됐습니다/중요합니다].
+        
+#         간략한 내용을 1-2문장으로 작성하세요. 내용은 특정 기술이나 서비스, 기업의 최신 소식을 다루고, 
+#         핵심 내용만 포함해주세요. 그리고 왜 중요한지를 강조해주세요.
+        
+#         구체적인 수치나 인용구가 있다면 추가해주세요.
+        
+#         각 소식의 마지막에는 뉴스 기사의 발행일과 출처를 반드시 "[출처 제목](출처 URL)" 형식으로 포함하세요.
+        
+#         모든 주제는 반드시 제공된 실제 뉴스 기사에서만 추출해야 합니다. 가상의 정보나 사실이 아닌 내용은 절대 포함하지 마세요.
+#         각 소식 사이에 충분한 공백을 두어 가독성을 높여주세요.
+#         """,
+        
+#         'aidt_tips': """
+#         AIDT Weekly 뉴스레터의 '이번 주 AT/DT 팁' 섹션을 생성해주세요.
+        
+#         이번 주 팁 주제는 "{current_topic}"입니다.
+        
+#         이 주제에 대해 다음 형식으로 실용적인 팁을 작성해주세요:
+        
+#         ## 이번 주 팁: [주제에 맞는 구체적인 팁 제목]
+        
+#         팁에 대한 배경과 중요성을 2-3문장으로 간결하게 설명해주세요. AI 기본기와 관련된 내용을 포함하세요.
+#         특히, 영어 용어는 한글로 번역하지 말고 그대로 사용해주세요 (예: "Chain of Thought", "Chain of Draft").
+        
+#         **핵심 프롬프트 예시:**
+#         - 첫 번째 프롬프트 템플릿 (Chain of Thought 활용):
+#           예시: [이 문제/작업에 대한 실제 예시를 제시하세요]
+#           프롬프트: [구체적인 Chain of Thought 프롬프트 템플릿을 작성하세요]
+        
+#         - 두 번째 프롬프트 템플릿 (Chain of Draft 활용):
+#           예시: [이 문제/작업에 대한 실제 예시를 제시하세요]
+#           프롬프트: [구체적인 Chain of Draft 프롬프트 템플릿을 작성하세요]
+        
+#         - 세 번째 프롬프트 템플릿 (Chain of Thought와 Chain of Draft 결합):
+#           예시: [이 문제/작업에 대한 실제 예시를 제시하세요]
+#           프롬프트: [두 기법을 결합한 프롬프트 템플릿을 작성하세요]
+        
+#         이 팁을 활용했을 때의 업무 효율성 향상이나 결과물 품질 개선 등 구체적인 이점을 한 문장으로 작성해주세요.
+        
+#         다음 주에는 다른 AI 기본기 팁을 알려드리겠습니다.
+#         """,
+        
+#         'success_story': """
+#         AIDT Weekly 뉴스레터의 '성공 사례' 섹션을 생성해주세요.
+#         한국 기업 사례 1개와 외국 기업 사례 1개를 생성해야 합니다.
+#         각 사례는 제목과 3개의 단락으로 구성되어야 합니다.
+#         각 단락은 3~4줄로 구성하고, 구체적인 내용과 핵심 정보를 포함해야 합니다.
+#         단락 사이에는 한 줄을 띄워서 가독성을 높여주세요.
+        
+#         형식:
+        
+#         ## [한국 기업명]의 AI 혁신 사례
+        
+#         첫 번째 단락에서는 기업이 직면한 문제와 배경을 상세히 설명합니다. 구체적인 수치나 상황을 포함하여 3~4줄로 작성해주세요. 이 부분에서는 독자가 왜 이 기업이 AI 솔루션을 필요로 했는지 이해할 수 있도록 해주세요.
+        
+#         두 번째 단락에서는 기업이 도입한 AI 솔루션을 상세히 설명합니다. 어떤 기술을 사용했는지, 어떻게 구현했는지, 특별한 접근 방식은 무엇이었는지 등을 포함하여 3~4줄로 작성해주세요.
+        
+#         세 번째 단락에서는 AI 도입 후 얻은 구체적인 성과와 결과를 설명합니다. 가능한 한 정량적인 수치(비용 절감, 효율성 증가, 고객 만족도 향상 등)를 포함하여 3~4줄로 작성해주세요.
+        
+#         ## [외국 기업명]의 AI 혁신 사례
+        
+#         첫 번째 단락에서는 기업이 직면한 문제와 배경을 상세히 설명합니다. 구체적인 수치나 상황을 포함하여 3~4줄로 작성해주세요. 이 부분에서는 독자가 왜 이 기업이 AI 솔루션을 필요로 했는지 이해할 수 있도록 해주세요.
+        
+#         두 번째 단락에서는 기업이 도입한 AI 솔루션을 상세히 설명합니다. 어떤 기술을 사용했는지, 어떻게 구현했는지, 특별한 접근 방식은 무엇이었는지 등을 포함하여 3~4줄로 작성해주세요.
+        
+#         세 번째 단락에서는 AI 도입 후 얻은 구체적인 성과와 결과를 설명합니다. 가능한 한 정량적인 수치(비용 절감, 효율성 증가, 고객 만족도 향상 등)를 포함하여 3~4줄로 작성해주세요.
+#         """,
+        
+#         'ai_use_case': """
+#         AIDT Weekly 뉴스레터의 'AI 활용사례' 섹션을 생성해주세요.
+#         아래는 검색된 실제 AI 활용사례 정보입니다:
+        
+#         {use_case_info}
+        
+#         위 검색 결과 중에서 가장 유용하고 구체적인 활용사례를 선택하여 다음 형식으로 내용을 작성해주세요:
+        
+#         ## [활용사례 제목] - 제목은 1줄로 명확하게
+        
+#         **요약:** 배경과 중요성을 2-3문장으로 간결하게 설명해주세요.
+        
+#         **단계별 방법:** AI 솔루션을 상세히 설명합니다. 어떤 기술을 사용했는지, 어떻게 구현했는지, 특별한 접근 방식은 무엇이었는지 등을 포함하여 3~4줄로 작성해주세요.
+        
+#         **추천 프롬프트:** 이 활용사례를 더 효과적으로 활용하기 위한 구체적이고 명확한 프롬프트 예시를 작성해주세요.
+        
+#         모든 내용은 반드시 제공된 검색 결과에서만 추출해야 합니다. 가상의 정보나 사실이 아닌 내용은 절대 포함하지 마세요.
+#         내용은 마크다운 형식으로 작성해주세요.
+#         """
+#     }
+    
+#     # 사용자 정의 프롬프트 사용 또는 기본 템플릿 채우기
+#     if custom_prompt:
+#         prompt = custom_prompt
+#     else:
+#         prompt = prompt_templates.get(content_type, "").format(**kwargs)
+    
+#     try:
+#         client = OpenAI(api_key=openai_api_key)
+        
+#         response = client.chat.completions.create(
+#             model="gpt-4-turbo-preview",
+#             messages=[
+#                 {"role": "system", "content": "AI 디지털 트랜스포메이션 뉴스레터 콘텐츠 생성 전문가. 간결하고 핵심적인 내용만 포함합니다."},
+#                 {"role": "user", "content": prompt}
+#             ],
+#             temperature=0.7
+#         )
+        
+#         content = response.choices[0].message.content
+#         return convert_markdown_to_html(content)
+        
+#     except Exception as e:
+#         print(f"OpenAI API 오류: {str(e)}")
+#         # 오류 발생 시 기본 콘텐츠 반환
+#         default_contents = {
+#             'main_news': "<p>OpenAI API 오류: 뉴스를 생성할 수 없습니다.</p>",
+#             'aidt_tips': get_default_tips_content(),
+#             'success_story': get_default_success_story(),
+#             'ai_use_case': get_default_ai_use_case()
+#         }
+#         return default_contents.get(content_type, f"<p>OpenAI API 오류: {str(e)}</p>")
+
 def generate_ai_content(openai_api_key, content_type, custom_prompt=None, **kwargs):
     """통합된 OpenAI 콘텐츠 생성 함수"""
     
@@ -402,8 +554,12 @@ def generate_ai_content(openai_api_key, content_type, custom_prompt=None, **kwar
         prompt = prompt_templates.get(content_type, "").format(**kwargs)
     
     try:
+        # OpenAI 클라이언트 초기화 - 수정된 부분
+        # client = OpenAI(api_key=openai_api_key)
+        from openai import OpenAI
         client = OpenAI(api_key=openai_api_key)
         
+        # OpenAI API 호출
         response = client.chat.completions.create(
             model="gpt-4-turbo-preview",
             messages=[
@@ -413,14 +569,19 @@ def generate_ai_content(openai_api_key, content_type, custom_prompt=None, **kwar
             temperature=0.7
         )
         
+        # 응답 처리
         content = response.choices[0].message.content
         return convert_markdown_to_html(content)
         
     except Exception as e:
         print(f"OpenAI API 오류: {str(e)}")
+        # 상세 오류 정보 출력 (디버깅용)
+        import traceback
+        print(f"상세 오류 정보: {traceback.format_exc()}")
+        
         # 오류 발생 시 기본 콘텐츠 반환
         default_contents = {
-            'main_news': "<p>OpenAI API 오류: 뉴스를 생성할 수 없습니다.</p>",
+            'main_news': f"<p>OpenAI API 오류: 뉴스를 생성할 수 없습니다. (오류: {str(e)})</p>",
             'aidt_tips': get_default_tips_content(),
             'success_story': get_default_success_story(),
             'ai_use_case': get_default_ai_use_case()
@@ -643,7 +804,6 @@ def generate_newsletter(api_keys, settings, custom_content=None):
     
     return html_content
 
-
 def create_naver_news_section(news_items, section_title):
     """네이버 뉴스 섹션 HTML 생성 함수"""
     content = f"<h2>{section_title}</h2>"
@@ -671,7 +831,6 @@ def create_naver_news_section(news_items, section_title):
                 content += "<hr>"
     
     return content
-
 
 def create_newsletter_html(content, issue_number, date, highlight_settings, streamlit_section=""):
     """뉴스레터 HTML 템플릿 생성 함수"""
@@ -1105,7 +1264,6 @@ def generate_streamlit_lesson(openai_api_key, selected_week):
         </div>
         """
 
-
 def generate_lesson_detail(openai_api_key, week, topic):
     """GPT를 사용하여 Streamlit 학습 내용 생성"""
     
@@ -1163,13 +1321,11 @@ def generate_lesson_detail(openai_api_key, week, topic):
             "example": "import streamlit as st\n\nst.title('Hello Streamlit!')\nst.write('Welcome to Streamlit learning!')\nif st.button('Click me'):\n    st.balloons()"
         }
 
-
 def create_download_link(html_content, filename):
     """HTML 콘텐츠를 다운로드할 수 있는 링크를 생성합니다."""
     b64 = base64.b64encode(html_content.encode()).decode()
     href = f'<a href="data:text/html;base64,{b64}" download="{filename}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #ff5722; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">뉴스레터 다운로드</a>'
     return href
-
 
 def main():
     st.title("중부Infra AT/DT 뉴스레터 생성기")
@@ -1323,6 +1479,6 @@ def main():
         각 API에 대한 키는 해당 서비스 사이트에서 발급받을 수 있습니다.
         """)
 
-
 if __name__ == "__main__":
     main()
+
