@@ -739,6 +739,10 @@ def generate_newsletter(api_keys, settings, custom_content=None):
                 client_secret=naver_client_secret,
                 sub_queries=["AI 활용사례 YouTube", "AI 활용사례 기업", "AI 활용사례 프롬프트"]
             )
+
+            # 로그 추가 - 이 부분을 추가하세요
+            print(f"검색된 AI 활용사례 수: {len(ai_use_cases)}")
+            print(f"첫 번째 검색 결과: {ai_use_cases[0] if ai_use_cases else '결과 없음'}")
             
             # 네이버 뉴스 콘텐츠 생성
             naver_news_content = create_naver_news_section(ai_news_items, "국내 AI 주요 소식")
