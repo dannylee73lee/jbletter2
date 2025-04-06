@@ -694,15 +694,52 @@ def generate_newsletter(api_keys, settings, custom_content=None):
         )
         
         # 사용자 정의 성공 사례가 있는 경우 사용, 없으면 생성
-# 사용자 정의 성공 사례가 있는 경우 사용, 없으면 생성
         if custom_content and 'success_story' in custom_content:
             newsletter_content['success_story'] = convert_markdown_to_html(custom_content['success_story'])
         else:
             newsletter_content['success_story'] = generate_ai_content(openai_api_key, 'success_story')
+            
+        # AI 활용사례 생성 - GPT로 직접 생성하도록 수정
+        custom_ai_use_case_prompt = """
+        AIDT Weekly 뉴스레터의 'AI 활용사례' 섹션을 생성해주세요.
+        
+        다음 형식으로 내용을 작성해주세요:
+        
+        ## [활용사례 제목] - 제목은 1줄로 명확하게
+        
+        **요약:** 배경과 중요성을 2-3문장으로 간결하게 설명해주세요.
+        
+        **단계별 방법:** 
+        1. [첫 번째 단계]
+        2. [두 번째 단계]
+        3. [세 번째 단계]
+        4. [네 번째 단계]
+        
+        **추천 프롬프트:** 이 활용사례를 더 효과적으로 활용하기 위한 구체적이고 명확한 프롬프트 예시를 작성해주세요.
+        
+        내용은 마크다운 형식으로 작성해주세요.
+        가상의 링크 URL과 출처 정보는 포함하지 마세요.
+        """
+        
+        # GPT로 AI 활용사례 직접 생성
+        ai_use_case_content = generate_ai_content(
+            openai_api_key,
+            'ai_use_case',
+            custom_ai_use_case_prompt
+        )
+        
+        # 링크와 출처 추가 (가상)
+        ai_use_case_content += f"""
+        <p style="text-align: right; margin-top: 15px;"><a href="https://example.com/ai-use-case" target="_blank" style="color: #ff5722; text-decoration: none; font-weight: bold;">더 많은 AI 활용사례 보기 →</a></p>
+        <p style="font-size: 8pt; text-align: right; color: #666;">출처: AI 리서치 센터</p>
+        """
+        
+        newsletter_content['ai_use_case'] = ai_use_case_content
     else:
         # OpenAI API가 없을 경우 기본 콘텐츠 사용
         newsletter_content['aidt_tips'] = get_default_tips_content()
         newsletter_content['success_story'] = get_default_success_story()
+        newsletter_content['ai_use_case'] = get_default_ai_use_case()
         if news_api_key:
             newsletter_content['main_news'] = "<p>OpenAI API 키가 없어 뉴스 분석을 할 수 없습니다.</p>"
     
@@ -729,21 +766,6 @@ def generate_newsletter(api_keys, settings, custom_content=None):
                 client_secret=naver_client_secret
             )
             
-            # AI 활용사례 검색
-            ai_use_cases = fetch_news(
-                'naver_search',
-                "AI 활용사례",
-                display=3,
-                days=30,
-                client_id=naver_client_id,
-                client_secret=naver_client_secret,
-                sub_queries=["AI 활용사례 YouTube", "AI 활용사례 기업", "AI 활용사례 프롬프트"]
-            )
-
-            # 로그 추가 - 이 부분을 추가하세요
-            print(f"검색된 AI 활용사례 수: {len(ai_use_cases)}")
-            print(f"첫 번째 검색 결과: {ai_use_cases[0] if ai_use_cases else '결과 없음'}")
-            
             # 네이버 뉴스 콘텐츠 생성
             naver_news_content = create_naver_news_section(ai_news_items, "국내 AI 주요 소식")
             trend_news_content = create_naver_news_section(trend_news_items, "국내 AI 트렌드 소식")
@@ -751,46 +773,10 @@ def generate_newsletter(api_keys, settings, custom_content=None):
             newsletter_content['naver_news'] = naver_news_content
             newsletter_content['naver_trends'] = trend_news_content
             
-            # AI 활용사례 콘텐츠 생성
-            if openai_api_key and ai_use_cases:
-                # AI 활용사례 정보 텍스트 구성
-                use_case_info = "AI 활용사례 검색 결과:\n\n"
-                for i, item in enumerate(ai_use_cases):
-                    use_case_info += f"{i+1}. 제목: {item['title']}\n"
-                    use_case_info += f"   설명: {item['description']}\n"
-                    use_case_info += f"   링크: {item['link']}\n"
-                    use_case_info += f"   블로그명: {item.get('bloggername', '알 수 없음')}\n\n"
-                
-                # OpenAI로 AI 활용사례 콘텐츠 생성
-                ai_use_case_content = generate_ai_content(
-                    openai_api_key,
-                    'ai_use_case',
-                    None,
-                    use_case_info=use_case_info
-                )
-                
-                # 링크와 출처 추가
-                if ai_use_cases:
-                    selected_link = ai_use_cases[0]['link']
-                    selected_source = ai_use_cases[0].get('bloggername', '출처 정보 없음')
-                    
-                    ai_use_case_content += f"""
-                    <p style="text-align: right; margin-top: 15px;"><a href="{selected_link}" target="_blank" style="color: #ff5722; text-decoration: none; font-weight: bold;">사례 확인해보기 →</a></p>
-                    <p style="font-size: 8pt; text-align: right; color: #666;">출처: {selected_source}</p>
-                    """
-                
-                newsletter_content['ai_use_case'] = ai_use_case_content
-            else:
-                newsletter_content['ai_use_case'] = get_default_ai_use_case()
-            
         except Exception as e:
             print(f"네이버 API 관련 오류: {str(e)}")
             newsletter_content['naver_news'] = f"<p>네이버 뉴스를 가져오는 중 오류가 발생했습니다.</p>"
             newsletter_content['naver_trends'] = f"<p>네이버 AI 트렌드 뉴스를 가져오는 중 오류가 발생했습니다.</p>"
-            newsletter_content['ai_use_case'] = get_default_ai_use_case()
-    else:
-        # 네이버 API가 없는 경우
-        newsletter_content['ai_use_case'] = get_default_ai_use_case()
     
     # 5. Streamlit 학습 과정 추가 (선택된 경우)
     streamlit_challenge_section = ""
