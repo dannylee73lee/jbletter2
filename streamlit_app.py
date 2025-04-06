@@ -699,39 +699,49 @@ def generate_newsletter(api_keys, settings, custom_content=None):
         else:
             newsletter_content['success_story'] = generate_ai_content(openai_api_key, 'success_story')
             
-        # AI 활용사례 생성 - GPT로 직접 생성하도록 수정
-        custom_ai_use_case_prompt = """
+        # AI 활용사례 생성 - 실제 사례 중심으로 수정
+        real_use_case_prompt = """
         AIDT Weekly 뉴스레터의 'AI 활용사례' 섹션을 생성해주세요.
         
-        다음 형식으로 내용을 작성해주세요:
+        실제 기업이나 조직에서 성공적으로 구현한 AI 활용사례를 다음 형식으로 작성해주세요:
         
-        ## [활용사례 제목] - 제목은 1줄로 명확하게
+        ## [기업/조직명]의 [구체적인 AI 활용 분야] 사례
         
-        **요약:** 배경과 중요성을 2-3문장으로 간결하게 설명해주세요.
+        **요약:** 해당 기업이 AI를 활용한 실제 사례의 배경과 중요성을 2-3문장으로 설명해주세요. 기업명, 산업 분야, 도입 시기 등 실제 정보를 포함하세요.
         
         **단계별 방법:** 
-        1. [첫 번째 단계]
-        2. [두 번째 단계]
-        3. [세 번째 단계]
-        4. [네 번째 단계]
+        1. [첫 번째 단계 - 구체적인 기술과 접근 방식]
+        2. [두 번째 단계 - 실제 구현 방법]
+        3. [세 번째 단계 - 데이터 처리나 모델 학습 방법]
+        4. [네 번째 단계 - 실제 운영 과정]
         
-        **추천 프롬프트:** 이 활용사례를 더 효과적으로 활용하기 위한 구체적이고 명확한 프롬프트 예시를 작성해주세요.
+        **추천 프롬프트:** 이 활용사례를 응용할 때 사용할 수 있는 구체적이고 실용적인 프롬프트 예시를 작성해주세요.
+        
+        다음 중 한 분야에 초점을 맞춰 실제 사례를 작성해주세요:
+        1. 제조업 - 품질 관리, 예측 유지보수, 공정 최적화
+        2. 금융 - 사기 탐지, 고객 세분화, 리스크 평가
+        3. 의료 - 진단 보조, 환자 모니터링, 의료 영상 분석
+        4. 소매/유통 - 수요 예측, 개인화 추천, 재고 관리
+        5. 고객 서비스 - 챗봇, 감성 분석, 업무 자동화
+        
+        반드시 실제 존재하는 기업과 검증된 사례를 바탕으로 작성해주세요. 구체적인 수치와 성과를 포함하세요.
+        사용한 실제 AI 기술(예: 딥러닝, 자연어 처리, 컴퓨터 비전 등)도 명시하세요.
+        마케팅적 과장이나 가상의 정보는 포함하지 마세요.
         
         내용은 마크다운 형식으로 작성해주세요.
-        가상의 링크 URL과 출처 정보는 포함하지 마세요.
         """
         
         # GPT로 AI 활용사례 직접 생성
         ai_use_case_content = generate_ai_content(
             openai_api_key,
             'ai_use_case',
-            custom_ai_use_case_prompt
+            real_use_case_prompt
         )
         
-        # 링크와 출처 추가 (가상)
+        # 실제 참고 링크 추가
         ai_use_case_content += f"""
-        <p style="text-align: right; margin-top: 15px;"><a href="https://example.com/ai-use-case" target="_blank" style="color: #ff5722; text-decoration: none; font-weight: bold;">더 많은 AI 활용사례 보기 →</a></p>
-        <p style="font-size: 8pt; text-align: right; color: #666;">출처: AI 리서치 센터</p>
+        <p style="text-align: right; margin-top: 15px;"><a href="https://www.accenture.com/us-en/insights/artificial-intelligence-index" target="_blank" style="color: #ff5722; text-decoration: none; font-weight: bold;">더 많은 AI 활용사례 보기 →</a></p>
+        <p style="font-size: 8pt; text-align: right; color: #666;">출처: Accenture AI 리서치</p>
         """
         
         newsletter_content['ai_use_case'] = ai_use_case_content
